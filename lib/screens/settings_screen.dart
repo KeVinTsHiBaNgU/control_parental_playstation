@@ -6,7 +6,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  double _usageDuration = 1; // Durée initiale : 1 heure
+  double _usageDuration = 1; // Durée initiale en heures
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +19,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Durée maximale d\'utilisation (en heures) : ${_usageDuration.toInt()}h',
-              style: TextStyle(fontSize: 18)),
+            Text(
+              'Durée maximale d\'utilisation (en heures) : ${_usageDuration.toInt()}h',
+              style: TextStyle(fontSize: 18),
+            ),
             Slider(
               value: _usageDuration,
               min: 1,
@@ -35,7 +37,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Sauvegarder la durée définie et retourner à la page d'accueil
                 Navigator.pop(context, _usageDuration);
               },
               child: Text('Sauvegarder'),
