@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'screens/home_screen.dart';
-import 'screens/settings_screen.dart';
+// import 'screens/settings_screen.dart';
 
-void main() {
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _initializeNotifications(); // Initialiser les notifications
   runApp(ControlParentalApp());
+}
+
+Future<void> _initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher'); // Assurez-vous d'avoir un icône
+
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
 
 class ControlParentalApp extends StatelessWidget {
@@ -17,7 +33,7 @@ class ControlParentalApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/settings': (context) => SettingsScreen(),
+        // '/settings': (context) => SettingsScreen(),
       },
     );
   }

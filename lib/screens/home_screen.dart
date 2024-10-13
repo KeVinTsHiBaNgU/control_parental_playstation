@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/playstation_service.dart';
 import 'dart:async';
 import 'session_duration_screen.dart'; // Importer le nouvel écran
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Importer le package de notifications
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,6 +15,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   int _timeElapsed = 0; // Temps écoulé en minutes
   int _sessionDuration = 30; // Durée de session par défaut
+
+  // Déclarer le plugin ici
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _timeElapsed = 0; // Réinitialiser le temps écoulé
+  }
 
   Future<void> _turnOnPlayStation() async {
     bool success = await PlayStationService.turnOn();
@@ -45,8 +56,32 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_timeElapsed >= _sessionDuration) {
         _turnOffPlayStation();
         _showAlertDialog();
+        _showNotification(); // Afficher la notification
       }
     });
+  }
+
+  void _showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'session_duration_channel',
+      'Durée de session',
+      channelDescription: 'Notifications pour la durée de session',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Session terminée',
+      'La durée de session est atteinte. La PlayStation va s\'éteindre.',
+      platformChannelSpecifics,
+      payload: 'session_terminée',
+    );
   }
 
   void _showAlertDialog() {
@@ -80,19 +115,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('État de la PlayStation'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () async {
-              final selectedDuration = await Navigator.pushNamed(context, '/settings');
-              if (selectedDuration != null) {
-                setState(() {
-                  maxUsageDuration = selectedDuration as double;
-                });
-              }
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.settings),
+        //     onPressed: () async {
+        //       final selectedDuration = await Navigator.pushNamed(context, '/settings');
+        //       if (selectedDuration != null) {
+        //         setState(() {
+        //           maxUsageDuration = selectedDuration as double;
+        //         });
+        //       }
+        //     },
+        //   ),
+        // ],
       ),
       body: Center(
         child: Column(
@@ -101,6 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('PlayStation $playStationStatus', style: TextStyle(fontSize: 24)),
             SizedBox(height: 20),
             Text('Temps écoulé : $_timeElapsed minutes'),
+            SizedBox(height: 20),
+            Text('Durée de session : $_sessionDuration minutes', // Afficher la durée de session
+                style: TextStyle(fontSize: 18, color: Colors.red)),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _turnOnPlayStation,
